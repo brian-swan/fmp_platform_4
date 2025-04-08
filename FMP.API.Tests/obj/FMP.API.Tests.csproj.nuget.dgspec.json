@@ -56,6 +56,10 @@
               "target": "Package",
               "version": "[9.0.0-preview.1.24081.5, )"
             },
+            "Microsoft.AspNetCore.Routing": {
+              "target": "Package",
+              "version": "[2.2.2, )"
+            },
             "Microsoft.Azure.Cosmos": {
               "target": "Package",
               "version": "[3.37.0, )"

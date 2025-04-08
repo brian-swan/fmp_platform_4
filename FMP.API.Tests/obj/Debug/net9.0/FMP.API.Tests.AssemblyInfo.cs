@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("FMP.API.Tests")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+2f731fd7cc721ca4de78b312b491b4a50b2d47a3")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+cfffcf6e1a7b748e3c0cfadec93c98549c3bcebf")]
 [assembly: System.Reflection.AssemblyProductAttribute("FMP.API.Tests")]
 [assembly: System.Reflection.AssemblyTitleAttribute("FMP.API.Tests")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
