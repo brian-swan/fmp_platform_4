@@ -6,19 +6,20 @@ using Xunit;
 
 namespace FMP.API.Tests.Authentication;
 
-public class AuthenticationTests
+public class AuthenticationTests : IClassFixture<ApiTestFixture>
 {
-    private const string BaseUrl = "https://api.featureflag.example/v1";
+    private readonly ApiTestFixture _fixture;
     
+    public AuthenticationTests(ApiTestFixture fixture)
+    {
+        _fixture = fixture;
+    }
+
     [Fact]
     public async Task Request_WithValidApiKey_Succeeds()
     {
-        // Arrange
-        using var httpClient = new HttpClient { BaseAddress = new Uri(BaseUrl) };
-        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("ApiKey", "test-api-key");
-        
-        // Act
-        var response = await httpClient.GetAsync("/environments");
+        // Act - use the fixture's HttpClient which already has a valid API key
+        var response = await _fixture.HttpClient.GetAsync("/environments");
         
         // Assert
         response.EnsureSuccessStatusCode();
@@ -27,8 +28,11 @@ public class AuthenticationTests
     [Fact]
     public async Task Request_WithNoApiKey_ReturnsUnauthorized()
     {
-        // Arrange
-        using var httpClient = new HttpClient { BaseAddress = new Uri(BaseUrl) };
+        // Arrange - create a new client without auth headers
+        using var httpClient = new HttpClient 
+        { 
+            BaseAddress = _fixture.HttpClient.BaseAddress 
+        };
         
         // Act
         var response = await httpClient.GetAsync("/environments");
@@ -40,8 +44,11 @@ public class AuthenticationTests
     [Fact]
     public async Task Request_WithInvalidApiKey_ReturnsUnauthorized()
     {
-        // Arrange
-        using var httpClient = new HttpClient { BaseAddress = new Uri(BaseUrl) };
+        // Arrange - create a new client with invalid auth
+        using var httpClient = new HttpClient 
+        { 
+            BaseAddress = _fixture.HttpClient.BaseAddress 
+        };
         httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("ApiKey", "invalid-key");
         
         // Act
@@ -54,8 +61,11 @@ public class AuthenticationTests
     [Fact]
     public async Task Request_WithWrongAuthScheme_ReturnsUnauthorized()
     {
-        // Arrange
-        using var httpClient = new HttpClient { BaseAddress = new Uri(BaseUrl) };
+        // Arrange - create a new client with wrong auth scheme
+        using var httpClient = new HttpClient 
+        { 
+            BaseAddress = _fixture.HttpClient.BaseAddress 
+        };
         httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", "test-api-key");
         
         // Act
