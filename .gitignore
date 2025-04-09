@@ -23,10 +23,9 @@ x86/
 [Aa][Rr][Mm]64/
 bld/
 [Bb]in/
-[Oo]bj/
+[Oo]bj/         # This should already ignore all obj directories
 [Ll]og/
 [Ll]ogs/
-FMP.API.Tests/obj/
 
 # Visual Studio cache/options directory
 .vs/
