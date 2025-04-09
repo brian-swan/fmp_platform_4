@@ -26,6 +26,7 @@ bld/
 [Oo]bj/
 [Ll]og/
 [Ll]ogs/
+FMP.API.Tests/obj/
 
 # Visual Studio cache/options directory
 .vs/
