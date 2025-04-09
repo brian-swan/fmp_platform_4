@@ -2,6 +2,8 @@ using System.Text.Json;
 using FMP.API.Models;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
+using Microsoft.AspNetCore.Http;
+using System.Net;
 
 namespace FMP.API.Middleware;
 
@@ -72,11 +74,13 @@ public class RateLimitMiddleware
 {
     private readonly RequestDelegate _next;
     private readonly IRateLimitService _rateLimitService;
+    private readonly RateLimitOptions _options;
     
-    public RateLimitMiddleware(RequestDelegate next, IRateLimitService rateLimitService)
+    public RateLimitMiddleware(RequestDelegate next, IRateLimitService rateLimitService, IOptions<RateLimitOptions> options)
     {
         _next = next;
         _rateLimitService = rateLimitService;
+        _options = options.Value;
     }
     
     public async Task InvokeAsync(HttpContext context)
@@ -103,9 +107,9 @@ public class RateLimitMiddleware
         bool isRateLimited = _rateLimitService.IsRateLimited(clientId, out int remaining, out DateTimeOffset reset);
         
         // Add rate limit headers
-        context.Response.Headers.Add("X-RateLimit-Limit", "100");
-        context.Response.Headers.Add("X-RateLimit-Remaining", remaining.ToString());
-        context.Response.Headers.Add("X-RateLimit-Reset", reset.ToUnixTimeSeconds().ToString());
+        context.Response.Headers["X-RateLimit-Limit"] = _options.LimitPerMinute.ToString();
+        context.Response.Headers["X-RateLimit-Remaining"] = remaining.ToString();
+        context.Response.Headers["X-RateLimit-Reset"] = reset.ToUnixTimeSeconds().ToString();
         
         if (isRateLimited)
         {

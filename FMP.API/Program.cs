@@ -4,6 +4,7 @@ using FMP.API.DataAccess.InMemory;
 using FMP.API.Middleware;
 using Microsoft.OpenApi.Models;
 using System.Text.Json.Serialization;
+using FMP.API.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,42 +16,8 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
     });
 
-// Add swagger
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(c =>
-{
-    c.SwaggerDoc("v1", new OpenApiInfo 
-    { 
-        Title = "Feature Management Platform API", 
-        Version = "v1",
-        Description = "API for managing feature flags across environments"
-    });
-    
-    // Configure API key authentication in Swagger
-    c.AddSecurityDefinition("ApiKey", new OpenApiSecurityScheme
-    {
-        Description = "API key needed to access the endpoints (ApiKey YOUR_API_KEY)",
-        Name = "Authorization",
-        In = ParameterLocation.Header,
-        Type = SecuritySchemeType.ApiKey,
-        Scheme = "ApiKey"
-    });
-
-    c.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "ApiKey"
-                }
-            },
-            new string[] {}
-        }
-    });
-});
+// Replace the existing Swagger registration with our custom method
+builder.Services.AddSwaggerWithApiKey();
 
 // Conditionally register the appropriate data access services
 #if DEBUG
@@ -80,8 +47,9 @@ builder.Services.AddSingleton<IRateLimitService, RateLimitService>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline
-app.UseSwagger();
-app.UseSwaggerUI();
+
+// Replace the existing Swagger UI configuration with our custom method
+app.UseSwaggerWithApiKey();
 
 app.UseHttpsRedirection();
 
@@ -101,4 +69,18 @@ using (var scope = app.Services.CreateScope())
 }
 #endif
 
-app.Run();
+// Properly handle debug mode
+if (args.Contains("--debug"))
+{
+    Console.WriteLine("Running in debug mode with in-memory data store");
+    Console.WriteLine($"Application started. Listening on {app.Urls.FirstOrDefault() ?? "default URL"}");
+    Console.WriteLine("Press Ctrl+C to shut down.");
+    
+    // Prevent immediate shutdown in console mode
+    await app.RunAsync();
+}
+else
+{
+    // Normal run without console waiting
+    app.Run();
+}

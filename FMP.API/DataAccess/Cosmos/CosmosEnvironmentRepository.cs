@@ -1,7 +1,9 @@
 using FMP.API.DataAccess.Interfaces;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.Cosmos.Linq;
-using Environment = FMP.API.Models.Environment;
+using System.Net;
+// Use a more specific type alias to avoid ambiguity
+using EnvironmentModel = FMP.API.Models.Environment;
 
 namespace FMP.API.DataAccess.Cosmos;
 
@@ -14,13 +16,13 @@ public class CosmosEnvironmentRepository : IEnvironmentRepository
         _context = context;
     }
 
-    public async Task<List<Environment>> GetAllEnvironmentsAsync()
+    public async Task<List<EnvironmentModel>> GetAllEnvironmentsAsync()
     {
         var container = await _context.GetEnvironmentsContainerAsync();
-        var query = container.GetItemLinqQueryable<Environment>().AsQueryable();
+        var query = container.GetItemLinqQueryable<EnvironmentModel>().AsQueryable();
         var iterator = query.ToFeedIterator();
         
-        var results = new List<Environment>();
+        var results = new List<EnvironmentModel>();
         while (iterator.HasMoreResults)
         {
             var response = await iterator.ReadNextAsync();
@@ -30,27 +32,27 @@ public class CosmosEnvironmentRepository : IEnvironmentRepository
         return results;
     }
 
-    public async Task<Environment?> GetEnvironmentByIdAsync(string id)
+    public async Task<EnvironmentModel?> GetEnvironmentByIdAsync(string id)
     {
         try
         {
             var container = await _context.GetEnvironmentsContainerAsync();
-            var response = await container.ReadItemAsync<Environment>(id, new PartitionKey(id));
+            var response = await container.ReadItemAsync<EnvironmentModel>(id, new PartitionKey(id));
             return response.Resource;
         }
-        catch (CosmosException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+        catch (CosmosException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
         {
             return null;
         }
     }
 
-    public async Task<Environment?> GetEnvironmentByKeyAsync(string key)
+    public async Task<EnvironmentModel?> GetEnvironmentByKeyAsync(string key)
     {
         var container = await _context.GetEnvironmentsContainerAsync();
         var query = new QueryDefinition("SELECT * FROM c WHERE c.key = @key")
             .WithParameter("@key", key);
         
-        var iterator = container.GetItemQueryIterator<Environment>(query);
+        var iterator = container.GetItemQueryIterator<EnvironmentModel>(query);
         
         if (iterator.HasMoreResults)
         {
@@ -61,7 +63,7 @@ public class CosmosEnvironmentRepository : IEnvironmentRepository
         return null;
     }
 
-    public async Task<Environment> CreateEnvironmentAsync(Environment environment)
+    public async Task<EnvironmentModel> CreateEnvironmentAsync(EnvironmentModel environment)
     {
         // Check if key already exists
         var existingEnv = await GetEnvironmentByKeyAsync(environment.Key);
@@ -85,9 +87,9 @@ public class CosmosEnvironmentRepository : IEnvironmentRepository
         try
         {
             var container = await _context.GetEnvironmentsContainerAsync();
-            await container.DeleteItemAsync<Environment>(id, new PartitionKey(id));
+            await container.DeleteItemAsync<EnvironmentModel>(id, new PartitionKey(id));
         }
-        catch (CosmosException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+        catch (CosmosException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
         {
             throw new ApiException("not_found", "Environment not found", 404);
         }
