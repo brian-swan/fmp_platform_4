@@ -7,7 +7,7 @@ namespace FMP.API.Tests.Fixtures;
 
 public class ApiTestFixture : IDisposable
 {
-    private const string BaseUrl = "https://api.featureflag.example/v1";
+    private readonly MockApiServer _mockServer;
     private const string ApiKey = "test-api-key";
     
     public HttpClient HttpClient { get; }
@@ -15,10 +15,9 @@ public class ApiTestFixture : IDisposable
 
     public ApiTestFixture()
     {
-        HttpClient = new HttpClient
-        {
-            BaseAddress = new Uri(BaseUrl)
-        };
+        // Create and use a mock server instead of connecting to a remote API
+        _mockServer = new MockApiServer();
+        HttpClient = _mockServer.Client;
         
         // Set default headers for all requests
         HttpClient.DefaultRequestHeaders.Authorization = 
@@ -33,7 +32,7 @@ public class ApiTestFixture : IDisposable
 
     public void Dispose()
     {
-        HttpClient.Dispose();
+        _mockServer.Dispose();
     }
 
     public StringContent CreateJsonContent<T>(T data)
@@ -45,9 +44,7 @@ public class ApiTestFixture : IDisposable
 
     public async Task<T?> DeserializeResponseAsync<T>(HttpResponseMessage response)
     {
-        if (!response.IsSuccessStatusCode)
-            return default;
-            
+        // Remove the success status code check to allow deserializing error responses
         string content = await response.Content.ReadAsStringAsync();
         if (string.IsNullOrWhiteSpace(content))
             return default;

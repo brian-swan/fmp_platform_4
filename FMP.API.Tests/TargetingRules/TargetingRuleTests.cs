@@ -64,10 +64,12 @@ public class TargetingRuleTests : IClassFixture<ApiTestFixture>
         var content = _fixture.CreateJsonContent(ruleRequest);
         var createResponse = await _fixture.HttpClient.PostAsync($"/flags/{flagId}/rules", content);
         var createdRule = await _fixture.DeserializeResponseAsync<TargetingRule>(createResponse);
-        
+        //var f = await _fixture.HttpClient.GetAsync($"/flags/flag-123");
+        //Console.WriteLine(f.ToString());
+
         // Act
         var response = await _fixture.HttpClient.DeleteAsync($"/flags/{flagId}/rules/{createdRule!.Id}");
-
+        Console.WriteLine(createdRule.Id);
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
     }
@@ -78,7 +80,7 @@ public class TargetingRuleTests : IClassFixture<ApiTestFixture>
         // Arrange
         string flagId = "flag-123"; // This should be a valid ID in your test environment
         string invalidRuleId = "non-existent-rule";
-        
+       
         // Act
         var response = await _fixture.HttpClient.DeleteAsync($"/flags/{flagId}/rules/{invalidRuleId}");
 
