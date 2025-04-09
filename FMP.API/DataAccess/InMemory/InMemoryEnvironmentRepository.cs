@@ -1,30 +1,31 @@
 using FMP.API.DataAccess.Interfaces;
-using Environment = FMP.API.Models.Environment;
+// Use a more specific type alias to avoid ambiguity
+using EnvironmentModel = FMP.API.Models.Environment;
 
 namespace FMP.API.DataAccess.InMemory;
 
 public class InMemoryEnvironmentRepository : IEnvironmentRepository
 {
-    private readonly Dictionary<string, Environment> _environments = new();
+    private readonly Dictionary<string, EnvironmentModel> _environments = new();
 
-    public Task<List<Environment>> GetAllEnvironmentsAsync()
+    public Task<List<EnvironmentModel>> GetAllEnvironmentsAsync()
     {
         return Task.FromResult(_environments.Values.ToList());
     }
 
-    public Task<Environment?> GetEnvironmentByIdAsync(string id)
+    public Task<EnvironmentModel?> GetEnvironmentByIdAsync(string id)
     {
         _environments.TryGetValue(id, out var environment);
         return Task.FromResult(environment);
     }
 
-    public Task<Environment?> GetEnvironmentByKeyAsync(string key)
+    public Task<EnvironmentModel?> GetEnvironmentByKeyAsync(string key)
     {
         var environment = _environments.Values.FirstOrDefault(e => e.Key == key);
         return Task.FromResult(environment);
     }
 
-    public async Task<Environment> CreateEnvironmentAsync(Environment environment)
+    public async Task<EnvironmentModel> CreateEnvironmentAsync(EnvironmentModel environment)
     {
         // Check if key already exists
         if (await GetEnvironmentByKeyAsync(environment.Key) != null)

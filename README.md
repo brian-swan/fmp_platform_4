@@ -14,16 +14,22 @@ A feature flag management platform built with .NET 9, allowing you to manage fea
 
 ## Running the API
 
+You can use the included Makefile to run various commands:
+
 ### Debug Mode (In-Memory Data Store)
 
 In debug mode, the API uses an in-memory data store and seeds it with example data automatically:
 
 ```bash
+# Using make:
+make runapi-debug
+
+# Or manually:
 cd FMP.API
 dotnet run --debug
 ```
 
-The API will be available at `https://localhost:5001` and the Swagger UI at `https://localhost:5001/swagger`.
+The API will be available at `http://localhost:5000` and the Swagger UI at `http://localhost:5000/swagger`.
 
 ### Regular Mode (Cosmos DB)
 
@@ -33,11 +39,53 @@ For normal operation, the API connects to Cosmos DB. Make sure you have the Cosm
 2. Run the API:
 
 ```bash
+# In the future, this will be available as:
+# make run-cosmos
+
+# For now:
 cd FMP.API
 dotnet run
 ```
 
 The API will connect to the local Cosmos DB Emulator using the connection string configured in `appsettings.json`.
+
+## Running Tests
+
+The Makefile provides several commands for running tests:
+
+```bash
+# Run all tests
+make runtests
+
+# Run specific test categories
+make testflags     # Run Feature Flag tests
+make testrules     # Run Targeting Rule tests
+make testenv       # Run Environment tests
+make testanalytics # Run Analytics tests
+
+# Run a specific test by name
+make test name=AddTargetingRule_WithValidData_ReturnsCreatedRule
+```
+
+## Building and Cleaning
+
+```bash
+# Build the solution
+make build
+
+# Clean the solution
+make clean
+```
+
+## Development Helpers
+
+```bash
+# Watch for changes and auto-restart the API
+make watch
+
+# See all available make commands
+make help
+```
 
 ## Configuration
 
@@ -50,10 +98,10 @@ All configuration is in `appsettings.json`:
 
 ## Authentication
 
-The API uses API key-based authentication. Include the key in the `Authorization` header:
-
+The API uses API key-based authentication. Include the key in the `Authorization` header with one of the following formats:
 ```
 Authorization: ApiKey YOUR_API_KEY
+Authorization: Bearer YOUR_API_KEY
 ```
 
 The default API key is `test-api-key` (configured in appsettings.json).
